@@ -16,6 +16,7 @@ import {
   mockedBalances,
   mockUnknownError,
   mockTransactions,
+  mockTransactionsWithMultipleCurrencies,
   mockDetailedAccount,
   mockInstitution,
   mockAccountMetaData,
@@ -36,6 +37,7 @@ import {
 } from '../gocardless-service.js';
 
 describe('goCardlessService', () => {
+  const originalEnv = process.env;
   const accountId = mockAccountMetaData.id;
   const requisitionId = mockRequisition.id;
 
@@ -64,6 +66,7 @@ describe('goCardlessService', () => {
   });
 
   afterEach(() => {
+    process.env = originalEnv;
     jest.resetAllMocks();
   });
 
@@ -521,6 +524,66 @@ describe('goCardlessService', () => {
                   "currency": "EUR",
                 },
                 "valueDate": "date",
+              },
+            ],
+          },
+        }
+      `);
+      expect(getTransactionsSpy).toBeCalledTimes(1);
+    });
+
+    it('it converts the currency when ENV CONVERT_TO_CURRENCY is set', async () => {
+      getTransactionsSpy.mockResolvedValue(
+        mockTransactionsWithMultipleCurrencies,
+      );
+      process.env.CONVERT_TO_CURRENCY = 'SEK';
+
+      expect(
+        await goCardlessService.getTransactions({
+          institutionId: 'SANDBOXFINANCE_SFIN0000',
+          accountId,
+          startDate: '',
+          endDate: '',
+        }),
+      ).toMatchInlineSnapshot(`
+        {
+          "transactions": {
+            "booked": [
+              {
+                "bankTransactionCode": "string",
+                "bookingDate": "date",
+                "date": "date",
+                "debtorAccount": {
+                  "iban": "string",
+                },
+                "debtorName": "string",
+                "transactionAmount": {
+                  "amount": "328.18",
+                  "currency": "SEK",
+                },
+                "transactionId": "string",
+                "valueDate": "date",
+              },
+              {
+                "bankTransactionCode": "string",
+                "bookingDate": "date",
+                "date": "date",
+                "transactionAmount": {
+                  "amount": "947.26",
+                  "currency": "SEK",
+                },
+                "transactionId": "string",
+                "valueDate": "date",
+              },
+            ],
+            "pending": [
+              {
+                "date": "2024-01-14",
+                "transactionAmount": {
+                  "amount": "1058.14578658",
+                  "currency": "SEK",
+                },
+                "valueDate": "2024-01-14",
               },
             ],
           },
