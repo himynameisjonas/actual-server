@@ -15,6 +15,7 @@ import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import jwt from 'jws';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
+import converter from 'currency-exchanger-js';
 
 const GoCardlessClient = nordigenNode.default;
 
@@ -33,6 +34,27 @@ const getGocardlessClient = () => {
   }
 
   return clients.get(hash);
+};
+
+const convertForeignCurrency = async (transaction, toCurrency) => {
+  const { amount, currency } = transaction.transactionAmount;
+  let amountFloat = parseFloat(amount);
+
+  if (currency !== toCurrency) {
+    const convertedAmount = await converter.convertOnDate(
+      amountFloat,
+      currency,
+      toCurrency,
+      new Date(transaction.valueDate),
+    );
+
+    transaction.transactionAmount = {
+      amount: convertedAmount.toString(),
+      currency: toCurrency,
+    };
+  }
+
+  return transaction;
 };
 
 export const handleGoCardlessError = (response) => {
@@ -454,6 +476,19 @@ export const goCardlessService = {
     response.transactions.pending = response.transactions.pending
       .map((transaction) => bank.normalizeTransaction(transaction, false))
       .filter((transaction) => transaction);
+
+    if (process.env.CONVERT_TO_CURRENCY) {
+      response.transactions.booked = await Promise.all(
+        response.transactions.booked.map(async (transaction) =>
+          convertForeignCurrency(transaction, process.env.CONVERT_TO_CURRENCY),
+        ),
+      );
+      response.transactions.pending = await Promise.all(
+        response.transactions.pending.map(async (transaction) =>
+          convertForeignCurrency(transaction, process.env.CONVERT_TO_CURRENCY),
+        ),
+      );
+    }
 
     return response;
   },

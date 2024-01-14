@@ -61,6 +61,46 @@ export const mockTransactions = {
   },
 };
 
+export const mockTransactionsWithMultipleCurrencies = {
+  transactions: {
+    booked: [
+      {
+        transactionId: 'string',
+        debtorName: 'string',
+        debtorAccount: {
+          iban: 'string',
+        },
+        transactionAmount: {
+          currency: 'SEK',
+          amount: '328.18',
+        },
+        bankTransactionCode: 'string',
+        bookingDate: 'date',
+        valueDate: 'date',
+      },
+      {
+        transactionId: 'string',
+        transactionAmount: {
+          currency: 'SEK',
+          amount: '947.26',
+        },
+        bankTransactionCode: 'string',
+        bookingDate: 'date',
+        valueDate: 'date',
+      },
+    ],
+    pending: [
+      {
+        transactionAmount: {
+          currency: 'EUR',
+          amount: '94',
+        },
+        valueDate: '2024-01-14',
+      },
+    ],
+  },
+};
+
 export const mockUnknownError = {
   summary: "Couldn't update account balances",
   detail: 'Request to Institution returned an error',
