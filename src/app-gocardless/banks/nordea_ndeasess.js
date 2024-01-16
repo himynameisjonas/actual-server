@@ -14,10 +14,9 @@ export default {
     return {
       ...transaction,
       remittanceInformationUnstructured:
-        transaction.remittanceInformationUnstructured?.replace(
-          /Kortköp \d{6} /,
-          '',
-        ),
+        transaction.remittanceInformationUnstructured
+          ?.replace(/Reservation Kortköp /, '')
+          .replace(/Kortköp \d{6} /, ''),
     };
   },
 

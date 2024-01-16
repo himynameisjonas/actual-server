@@ -20,6 +20,23 @@ describe('NORDEA_NDEASESS', () => {
       );
     });
 
+    it('Removes the reserved prefix from string', () => {
+      const transaction = {
+        ...mockTransactions.transactions.booked[0],
+        remittanceInformationUnstructured: 'Reservation Kortköp Systembolaget',
+        bookingDate: '2024-01-15',
+      };
+
+      const normalizedTransaction = NORDEA_NDEASESS.normalizeTransaction(
+        transaction,
+        true,
+      );
+
+      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
+        'Systembolaget',
+      );
+    });
+
     it('Handles empty value', () => {
       const transaction = {
         ...mockTransactions.transactions.booked[0],
