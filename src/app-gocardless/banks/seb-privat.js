@@ -1,26 +1,13 @@
+import * as d from 'date-fns';
 import {
   sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
 } from '../utils.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
-
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: [
-    'SPARNORD_SPNODK22',
-    'LAGERNES_BANK_LAPNDKK1',
-    'ANDELSKASSEN_FALLESKASSEN_FAELDKK1',
-  ],
+  institutionIds: ['SEB_ESSESESS_PRIVATE'],
 
   accessValidForDays: 180,
 
@@ -38,14 +25,23 @@ export default {
     };
   },
 
-  /**
-   * Banks on the BEC backend only give information regarding the transaction in additionalInformation
-   */
   normalizeTransaction(transaction, _booked) {
+    const date =
+      transaction.bookingDate ||
+      transaction.bookingDateTime ||
+      transaction.valueDate ||
+      transaction.valueDateTime;
+    // If we couldn't find a valid date field we filter out this transaction
+    // and hope that we will import it again once the bank has processed the
+    // transaction further.
+    if (!date) {
+      return null;
+    }
     return {
       ...transaction,
-      date: transaction.bookingDate,
-      remittanceInformationUnstructured: transaction.additionalInformation,
+      // Creditor name is stored in additionInformation for SEB
+      creditorName: transaction.additionalInformation,
+      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },
 
@@ -54,15 +50,12 @@ export default {
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
+    const currentBalance = balances.find(
+      (balance) => 'interimBooked' === balance.balanceType,
+    );
+
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
+    }, amountToInteger(currentBalance.balanceAmount.amount));
   },
 };

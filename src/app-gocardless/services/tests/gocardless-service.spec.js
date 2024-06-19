@@ -245,6 +245,7 @@ describe('goCardlessService', () => {
 
     it('calls goCardlessClient and delete requisition', async () => {
       setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
@@ -258,6 +259,7 @@ describe('goCardlessService', () => {
 
     it('handle error if status_code present in the response', async () => {
       setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       createRequisitionSpy.mockResolvedValue(mockUnknownError);
 
