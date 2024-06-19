@@ -1,3 +1,8 @@
+### Publish fork
+`docker build -t himynameisjonas/actual-server:24.6.0-converter-nordea .`
+
+`docker push himynameisjonas/actual-server:24.6.0-converter-nordea`
+
 This is the main project to run [Actual](https://github.com/actualbudget/actual), a local-first personal finance tool. It comes with the latest version of Actual, and a server to persist changes and make data available across all devices.
 
 ### Getting Started
@@ -7,7 +12,7 @@ If you are interested in contributing, or want to know how development works, se
 
 Want to say thanks? Click the ⭐ at the top of the page.
 
-### Documentation 
+### Documentation
 
 We have a wide range of documentation on how to use Actual. This is all available in our [Community Documentation](https://actualbudget.org/docs/), including topics on [installing](https://actualbudget.org/docs/install/), [Budgeting](https://actualbudget.org/docs/budgeting/), [Account Management](https://actualbudget.org/docs/accounts/), [Tips & Tricks](https://actualbudget.org/docs/getting-started/tips-tricks) and some documentation for developers.
 
